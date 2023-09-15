@@ -42,6 +42,14 @@ char *builtin_str[] = {
   "prompt"
 };
 
+char *builtin_help[] = {
+    "changes directory",
+    "displays this help text",
+    "exits the shell",
+    "alias of exit",
+    "changes the prompt"
+};
+
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
@@ -88,7 +96,7 @@ int lsh_help(char **args)
   printf("The following are built in:\n");
 
   for (i = 0; i < lsh_num_builtins(); i++) {
-    printf("  %s\n", builtin_str[i]);
+    printf("\t%s: %s\n", builtin_str[i], builtin_help[i]);
   }
 
   printf("Use the man command for information on other programs.\n");

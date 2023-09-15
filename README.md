@@ -11,14 +11,19 @@ limitations, including:
 * Arguments must be separated by whitespace.
 * No quoting arguments or escaping whitespace.
 * No piping or redirection.
-* Only builtins are: `cd`, `help`, `exit`.
+* Only builtins are: `cd`, `help`, `exit`, `quit`, and `prompt`.
 
 Running
 -------
 
-Use `gcc -o lsh src/main.c` to compile, and then `./lsh` to run. If you would
+Use `make` in order to build the `lsh` executable in the [`bin`](bin) directory.
+If you would like to use the standard library based implementation of 
+`lsh_read_line()`, then you need to edit the [`Makefile`](Makefile) to uncomment
+line 5, starting with 'CFLAGS' and rebuild by using `make` again.
+
+~~Use `gcc -o lsh src/main.c` to compile, and then `./lsh` to run. If you would
 like to use the standard-library based implementation of `lsh_read_line()`, then
-you can do: `gcc -DLSH_USE_STD_GETLINE -o lsh src/main.c`.
+you can do: `gcc -DLSH_USE_STD_GETLINE -o lsh src/main.c`.~~
 
 Contributing
 ------------
