@@ -18,11 +18,18 @@
 #include <string.h>
 
 /*
+  Global variable for the prompt display.
+  Easiest way I could think of for using this variable.
+ */
+char *prompt;
+
+/*
   Function Declarations for builtin shell commands:
  */
 int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
+int lsh_prompt(char **args);
 
 /*
   List of builtin commands, followed by their corresponding functions.
@@ -31,14 +38,16 @@ char *builtin_str[] = {
   "cd",
   "help",
   "exit",
-  "quit"
+  "quit",
+  "prompt"
 };
 
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
   &lsh_exit,
-  &lsh_exit
+  &lsh_exit,
+  &lsh_prompt
 };
 
 int lsh_num_builtins(void) {
@@ -94,6 +103,29 @@ int lsh_help(char **args)
 int lsh_exit(char **args)
 {
   return 0;
+}
+
+/**
+  @brief Built-in command to change the prompt.
+  @param args List of args, args[1] is what we want.
+  @return Always return 1, to continue executing.
+ */
+int lsh_prompt(char **args) {
+  if(args[1] == NULL) {
+    fprintf(stderr, "lsh: expected argument for prompt\n");
+  }
+  else {
+    prompt = realloc(prompt, strlen(args[1])+1);
+    if(prompt == NULL) {
+      fprintf(stderr, "lsh: couldn't reallocate memory for prompt\n");
+    }
+    else {
+      prompt = memset(prompt, 0, strlen(args[1])+1);
+      prompt = memcpy(prompt, args[1], strlen(args[1]));
+      prompt[strlen(args[1])+1] = '\0';
+    }
+  }
+  return 1;
 }
 
 /**
@@ -254,9 +286,10 @@ void lsh_loop(void)
   char *line;
   char **args;
   int status;
-
+  prompt = malloc(sizeof(char) * 5);
+  memcpy(prompt, "lsh>", 5);
   do {
-    printf("> ");
+    printf("%s ", prompt);
     line = lsh_read_line();
     args = lsh_split_line(line);
     status = lsh_execute(args);
@@ -264,6 +297,7 @@ void lsh_loop(void)
     free(line);
     free(args);
   } while (status);
+  free(prompt);
 }
 
 /**
