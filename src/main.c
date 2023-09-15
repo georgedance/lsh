@@ -30,16 +30,18 @@ int lsh_exit(char **args);
 char *builtin_str[] = {
   "cd",
   "help",
-  "exit"
+  "exit",
+  "quit"
 };
 
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
+  &lsh_exit,
   &lsh_exit
 };
 
-int lsh_num_builtins() {
+int lsh_num_builtins(void) {
   return sizeof(builtin_str) / sizeof(char *);
 }
 
