@@ -11,7 +11,7 @@ limitations, including:
 * Arguments must be separated by whitespace.
 * No quoting arguments or escaping whitespace.
 * No piping or redirection.
-* Only builtins are: `cd`, `help`, `exit`, `quit`, and `prompt`.
+* Only builtins are: `cd`, `help`, `exit`, `quit`, `prompt`, and `history`.
 
 Running
 -------
@@ -24,6 +24,29 @@ line 5, starting with 'CFLAGS' and rebuild by using `make` again.
 ~~Use `gcc -o lsh src/main.c` to compile, and then `./lsh` to run. If you would
 like to use the standard-library based implementation of `lsh_read_line()`, then
 you can do: `gcc -DLSH_USE_STD_GETLINE -o lsh src/main.c`.~~
+
+Builtins
+--------
+
+A list of builtins and their short help text.
+
+`cd`
+"changes directory"
+
+`help`
+"displays this help text"
+
+`exit`
+"exits the shell"
+
+`quit`
+"alias of exit"
+
+`prompt`
+"changes the prompt"
+
+`history`
+"displays, or runs specified index"
 
 Contributing
 ------------

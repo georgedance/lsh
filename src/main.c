@@ -21,6 +21,9 @@
   Global variable for the prompt display.
   Easiest way I could think of for using this variable.
  */
+#define HISTORY_SIZE 256
+char *history[HISTORY_SIZE];
+int history_index = 0;
 char *prompt;
 
 /*
@@ -30,6 +33,9 @@ int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
 int lsh_prompt(char **args);
+int lsh_history(char **args);
+int lsh_execute(char **args);
+char **lsh_split_line(char *line);
 
 /*
   List of builtin commands, followed by their corresponding functions.
@@ -39,7 +45,8 @@ char *builtin_str[] = {
   "help",
   "exit",
   "quit",
-  "prompt"
+  "prompt",
+  "history"
 };
 
 char *builtin_help[] = {
@@ -47,7 +54,8 @@ char *builtin_help[] = {
     "displays this help text",
     "exits the shell",
     "alias of exit",
-    "changes the prompt"
+    "changes the prompt",
+    "displays, or runs specified index"
 };
 
 int (*builtin_func[]) (char **) = {
@@ -55,7 +63,8 @@ int (*builtin_func[]) (char **) = {
   &lsh_help,
   &lsh_exit,
   &lsh_exit,
-  &lsh_prompt
+  &lsh_prompt,
+  &lsh_history
 };
 
 int lsh_num_builtins(void) {
@@ -125,7 +134,8 @@ int lsh_prompt(char **args) {
   else {
     prompt = realloc(prompt, strlen(args[1])+1);
     if(prompt == NULL) {
-      fprintf(stderr, "lsh: couldn't reallocate memory for prompt\n");
+      fprintf(stderr, "lsh: allocation error\n");
+      exit(EXIT_FAILURE);
     }
     else {
       prompt = memset(prompt, 0, strlen(args[1])+1);
@@ -134,6 +144,40 @@ int lsh_prompt(char **args) {
     }
   }
   return 1;
+}
+
+/**
+  @brief display history, or reexec that command
+  @param args List of args, we only care about args[1]
+  @return return 1, to continue execution.
+ */
+int lsh_history(char **args) {
+    if(args[1] == NULL) {
+        // just `history`, displays history
+        for(int i = 0; i < history_index; i++) {
+            printf("%d: %s\n", i, history[i]);
+        }
+    }
+    else if(args[2] != NULL) {
+        // more than `history 3`, complain
+        fprintf(stderr, "lsh: too many arguments\n");
+    }
+    else {
+        // DONE: execute that command again
+        // TODO: ideally, have that command appear in the input buffer
+        char *line = history[atoi(args[1])];
+        char *line2;
+        char **args2;
+        int status;
+        line2 = malloc(sizeof(char) * strlen(line));
+        line2 = memset(line2, 0, strlen(line)+1);
+        line2 = memcpy(line2, line, strlen(line)+1);
+        args2 = lsh_split_line(line2);
+        status = lsh_execute(args2);
+        free(line2);
+        return status;
+    }
+    return 1;
 }
 
 /**
@@ -200,6 +244,7 @@ char *lsh_read_line(void)
   ssize_t bufsize = 0; // have getline allocate a buffer for us
   if (getline(&line, &bufsize, stdin) == -1) {
     if (feof(stdin)) {
+      printf("\n");
       exit(EXIT_SUCCESS);  // We received an EOF
     } else  {
       perror("lsh: getline\n");
@@ -224,6 +269,7 @@ char *lsh_read_line(void)
     c = getchar();
 
     if (c == EOF) {
+      printf("\n");
       exit(EXIT_SUCCESS);
     } else if (c == '\n') {
       buffer[position] = '\0';
@@ -299,6 +345,12 @@ void lsh_loop(void)
   do {
     printf("%s ", prompt);
     line = lsh_read_line();
+
+    history[history_index] = malloc(sizeof(char) * strlen(line)+1);
+    history[history_index] = memset(history[history_index], 0, strlen(line)+1);
+    history[history_index] = memcpy(history[history_index], line, strlen(line)+1);
+    history_index++;
+
     args = lsh_split_line(line);
     status = lsh_execute(args);
 
@@ -306,6 +358,9 @@ void lsh_loop(void)
     free(args);
   } while (status);
   free(prompt);
+  for(int i = 0; i < history_index; i++) {
+      free(history[i]);
+  }
 }
 
 /**
